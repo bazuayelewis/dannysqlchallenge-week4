@@ -222,8 +222,10 @@ ORDER BY 1,txn_date;
 **NOTE: The image only shows the first 7 customer's closing balance per month**
 
 5. What is the percentage of customers who increase their closing balance by more than 5%?
-*For the 'deposit_transactions', 'expenses_transactions' and 'total_transactions' CTEs check PART B Q 3&4 for documentation
-In the 'initial_txn' CTE I used the **WHERE** clause to filter only transactions done in January and calculated the closing balance for each customer. For the 'final_txn' CTE I calculated the running closing balance for each customer.*
+
+*For the 'deposit_transactions', 'expenses_transactions' and 'total_transactions' CTEs check PART B Q 3&4 for documentation*
+
+*In the 'initial_txn' CTE I used the **WHERE** clause to filter only transactions done in January and calculated the closing balance for each customer. For the 'final_txn' CTE I calculated the running closing balance for each customer.*
 
 *Then I joined the 'initial_txn' and 'final_txn' tables and used the **WHERE** clause to set a condition to return customers who have made a 5% increase from their initial closing balance in January. I joined the qualified customers to the total customers to get the percent of customers who met the condition.*
 ```sql
@@ -330,6 +332,7 @@ ORDER BY 1,txn_date;
 **NOTE: The image shows 4 customers and thier balance for each transaction carried out**
 
 2. customer balance at the end of each month
+
 * Here I calculated the running closing balance for each customer on a monthly basis and also showed the total deposits and total expenses each customer carried out per month
 NOTE: This different from PART B Q4 where I calculated the closing balance for each customer every month independently without considering past transactions.*
 ```sql
