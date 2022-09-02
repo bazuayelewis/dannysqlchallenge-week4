@@ -117,7 +117,7 @@ ORDER BY 1;
 ## PART B
 1. What is the unique count and total amount for each transaction type?
 
-*I used the **GROUP BY** function to categorize values into each transaction(txn) type then unique customers per txn_type to avoid duplicates then also calculated the total amount transacted for each category using the **SUM** function*
+*I used the **GROUP BY** function to categorize values into each transaction(txn) type then used **DISTINCT** function for customers per txn_type to avoid duplicates. I also calculated the total amount transacted for each category using the **SUM** function*
 ```sql
 SELECT txn_type, COUNT(DISTINCT(customer_id)) unique_count, SUM(txn_amount) total_amount
 FROM customer_transactions
@@ -131,7 +131,7 @@ GROUP BY 1;
 
 2. What is the average total historical deposit counts and amounts for all customers?
 
-*Here I filtered the dataset using the **WHERE** clause to return customers who only depoisted. Then I calculated the average by counting the amounts of deposit transactions made and divided it by the amount of customers that performed them and rounded up to the nearest positive integer using **ROUND** function. I also used the **AVG** function to calculate the mean deposited amount and used **ROUND** function to round the numbers to the nearest two decimal places.*
+*Here I filtered the dataset using the **WHERE** clause to return customers who only depoisted. Then I calculated the average by counting the amounts of deposit transactions made and divided it by the amount of customers that performed them, and rounded up to the nearest positive integer using **ROUND** function. I also used the **AVG** function to calculate the mean deposited amount and used **ROUND** function to round the numbers to the nearest two decimal places.*
 ```sql
  SELECT txn_type, ROUND(COUNT(txn_type)/COUNT(DISTINCT(customer_id))) avg_deposits_made, ROUND(AVG(txn_amount),2) average_deposited_amount
  FROM customer_transactions
@@ -139,13 +139,15 @@ GROUP BY 1;
 ```
 ![2](https://user-images.githubusercontent.com/107050974/188128264-6b7d30d8-63dc-4dcf-8b92-754b84c89b02.png)
 
-*Average deposits made by all customers is 5 and the average deposited amount is 508.86*
+**Average deposits made by all customers is 5 and the average deposited amount is 508.86**
 
 3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
 
-*I created a CTE 'deposit_transactions' to store all transaction type that were deposits using the **WHERE** clause and created new columns 'months' to return the name of the month each transaction occured using the **MONTHNAME** function and 'txn' to return the number of transactions that occured. I used the GROUP BY function to categorize every customer 'txn' on a monthly basis
-For my second CTE 'expenses_transactions' I repeated similar steps but this time I changed the **WHERE** clause to return other 'txn' types that are not deposits.
-I later used a subquery to filter customers that made more than one deposits using the **WHERE** clause on the 'deposits_transaction' table then used the **UNION** function to join it to the 'expense_transaction' table that has been filtered to return customers who have at least one txn i.e txn is not empty. I used the outer query which consisted of a **GROUP BY** function to return the number of unique customers per month. I added an **ORDER BY** function to arrange my results but since we are dealing with months I added a **STR_TO_DATE** function with the neccessary format to arrange my results properly.* 
+*I created a CTE 'deposit_transactions' to store all transaction type that were deposits using the **WHERE** clause and created new columns 'months' to return the name of the month each transaction occured using the **MONTHNAME** function and 'txn' to return the number of transactions that occured. I used the GROUP BY function to categorize every customer 'txn' on a monthly basis*
+
+*For my second CTE 'other_transactions' I repeated similar steps but this time I changed the **WHERE** clause to return other 'txn' types that are not deposits.*
+
+*Then I used a subquery to filter customers that made more than one deposits using the **WHERE** clause on the 'deposits_transaction' table then used the **UNION** function to join it to the 'expense_transaction' table that has been filtered to return customers who have at least one txn i.e txn is not empty. I used the outer query which consisted of a **GROUP BY** function and the **DISTINCT** function to return the number of unique customers per month. I added an **ORDER BY** function to arrange my results but since we are dealing with months I added a **STR_TO_DATE** function with the neccessary format to arrange my results properly.* 
 ```sql
 WITH deposit_transactions AS (
 	SELECT *, monthname(txn_date) as months, COUNT(customer_id) txn
@@ -183,11 +185,12 @@ ORDER BY str_to_date(months,'%M');
 4. What is the closing balance for each customer at the end of the month?
 
 *For the first two CTEs check PART B Q3 for documentation.
-I used a subquey to perform a full outer join to return all records from the 'deposist_transactions' table and the 'expense_transactions' tables. For both tables, I specified that if the 'txn_amount' is greater than zero then it should return the sum of the 'txn_amount' that a customer transacted for that month if not it should return zero. This was done to avoid NULL values in our dataset.
-For the closing balance, I subtracted the total expenses from total deposits. I used the **GROUP BY** function to show the monthly closing balance for each customer
-NOTE:  
-I did not use running closing balance as the question did not specify. The closing balance in this solution is for each month with no reference to the previous month's balance.
-*
+I used a subquey to perform a full outer join to return all records from the 'deposist_transactions' table and the 'expense_transactions' tables. For both tables, I specified that if the 'txn_amount' is greater than zero then it should return the sum of the 'txn_amount' that a customer transacted for that month if not it should return zero. This was done to avoid NULL values in our dataset.*
+
+*For the closing balance, I subtracted the total expenses from total deposits. I used the **GROUP BY** function to show the monthly closing balance for each customer*
+
+*NOTE:  
+I did not use running closing balance as the question did not specify. The closing balance in this solution is for each month with no reference to the previous month's balance.*
 ```sql
 WITH deposit_transactions AS (
 	SELECT id, customer_id, monthname(txn_date) as months, SUM(txn_amount) deposits, txn_date
@@ -220,8 +223,9 @@ ORDER BY 1,txn_date;
 
 5. What is the percentage of customers who increase their closing balance by more than 5%?
 *For the 'deposit_transactions', 'expenses_transactions' and 'total_transactions' CTEs check PART B Q 3&4 for documentation
-In the 'initial_txn' CTE I used the **WHERE** clause to filter only transactions done in January and calculated the closing balance for each customer. For the 'final_txn' CTE I calculated the running closing balance for each customer.
-Then I joined the 'initial_txn' and 'final_txn' tables and used the **WHERE** clause to set a condition to return customers who have made a 5% increase from their initial closing balance in January. I joined the qualified customers to the total customers to get the percent of customers who met the condition.*
+In the 'initial_txn' CTE I used the **WHERE** clause to filter only transactions done in January and calculated the closing balance for each customer. For the 'final_txn' CTE I calculated the running closing balance for each customer.*
+
+*Then I joined the 'initial_txn' and 'final_txn' tables and used the **WHERE** clause to set a condition to return customers who have made a 5% increase from their initial closing balance in January. I joined the qualified customers to the total customers to get the percent of customers who met the condition.*
 ```sql
 WITH deposit_transactions AS (
 	SELECT id, customer_id, monthname(txn_date) as months, SUM(txn_amount) deposits, txn_date 
