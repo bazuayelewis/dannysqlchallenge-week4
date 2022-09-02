@@ -76,9 +76,9 @@ WHERE end_date < '2022-01-01';
 
 5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
 
-*For this query I started by creating a CTE called 'distributions' which consisted of a subquery called 'reallocation' that calculated the amount of days spent in a particular node before it switches to a random node. With the outer query using the NTILE function to split the results into groups of 2,5 and 20 using the results gotten from the inner query to generate columns that would be used to calculate for the median,80th percentile and 95th percentile respectively
-Then I created another CTE 'percentile' to return possible values of the n-percentiles I was searching for as when the range of numbers are even, two middle numbers need to be sumed up and divided by two to get the nth-percentile
-Lastly I used CASE statements to set conditions to return a value if odd and another value if even.*
+*For this query I started by creating a CTE called 'distributions' which consisted of a subquery called 'reallocation' that calculated the amount of days spent in a particular node before it switches to a random node. With the outer query using the **NTILE** function to split the results into groups of 2,5 and 20 using the results gotten from the inner query to generate columns that would be used to calculate for the median,80th percentile and 95th percentile respectively.
+Then I created another CTE called 'percentile' to return possible values of the n-percentiles I was searching for, when the range of numbers are even the two middle numbers need to be sumed up and divided by two to get the nth-percentile otherwise if odd it would pick the middle number.
+Lastly I used **CASE** statements to set conditions to return a value of the median(50th percentile),80th percentile and 95th percentile for each region.*
 ```sql
 WITH distributions AS (
         SELECT region_id, days, customer_id, 
@@ -115,7 +115,29 @@ ORDER BY 1;
 ## PART B
 1. What is the unique count and total amount for each transaction type?
 
+*I used the **GROUP BY** function to categorize values into each transaction(txn) type then unique customers per txn_type to avoid duplicates then also calculated the total amount transacted for each category using the **SUM** function*
+```sql
+SELECT txn_type, COUNT(DISTINCT(customer_id)) unique_count, SUM(txn_amount) total_amount
+FROM customer_transactions
+GROUP BY 1;
+```
+![1](https://user-images.githubusercontent.com/107050974/188124645-a4c41135-2111-4a91-8f97-61004ae5fe6d.png)
+
+- **A *deposit* transaction was perfomed by 500 customers and the total amount sumed up to 1,359,168.**
+- **A *purchase* transaction was performed by 448 customers and the total amount sumed up to 806,537.**
+- **A *withdrawal* transaction was performed by 439 customers and the total amount sumed up to 793,003.**
+
 2. What is the average total historical deposit counts and amounts for all customers?
+
+*Here I filtered the dataset using the **WHERE** clause to return customers who only depoisted. Then I calculated the average by counting the amounts of deposit transactions made and divided it by the amount of customers that performed them and rounded up to the nearest positive integer. I also used the **AVG** function to calculate the mean deposited amount and used **ROUND** to round the numbers to the nearest two decimal places.*
+```sql
+ SELECT txn_type, ROUND(COUNT(txn_type)/COUNT(DISTINCT(customer_id))) avg_deposits_made, ROUND(AVG(txn_amount),2) average_deposited_amount
+ FROM customer_transactions
+ WHERE txn_type = 'deposit';
+```
+![2](https://user-images.githubusercontent.com/107050974/188128264-6b7d30d8-63dc-4dcf-8b92-754b84c89b02.png)
+
+*Average deposits made by all customers is 5 and the average deposited amount is 508.86*
 
 3. For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
 
