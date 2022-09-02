@@ -76,9 +76,11 @@ WHERE end_date < '2022-01-01';
 
 5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
 
-*For this query I started by creating a CTE called 'distributions' which consisted of a subquery called 'reallocation' that calculated the amount of days spent in a particular node before it switches to a random node. With the outer query using the **NTILE** function to split the results into groups of 2,5 and 20 using the results gotten from the inner query to generate columns that would be used to calculate for the median,80th percentile and 95th percentile respectively.
-Then I created another CTE called 'percentile' to return possible values of the n-percentiles I was searching for, when the range of numbers are even the two middle numbers need to be sumed up and divided by two to get the nth-percentile otherwise if odd it would pick the middle number.
-Lastly I used **CASE** statements to set conditions to return a value of the median(50th percentile),80th percentile and 95th percentile for each region.*
+*For this query I started by creating a CTE called 'distributions' which consisted of a subquery called 'reallocation' that calculated the amount of days spent in a particular node before it switches to a random node. With the outer query using the **NTILE** function to split the results into groups of 2,5 and 20 using the results gotten from the inner query that generated the amount of days spent in a node before reallocation, to generate columns that would be used to calculate for the median,80th percentile and 95th percentile respectively of reallocation days for each region.*
+
+*Then I created another CTE called 'percentile' to return possible values of the n-percentiles I was searching for, when the range of numbers are even,two middle numbers need to be sumed up and divided by 2 to get the nth-percentile otherwise if odd it would pick the middle number.*
+
+*Lastly I used **CASE** statements to set conditions to return a value of the median(50th percentile),80th percentile and 95th percentile for each region.*
 ```sql
 WITH distributions AS (
         SELECT region_id, days, customer_id, 
